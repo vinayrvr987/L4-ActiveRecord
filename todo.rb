@@ -1,26 +1,8 @@
-require "date"
+require 'date'
 
 class Todo < ActiveRecord::Base
-  def overdue?
-    Date.today > due_date
-  end
-
-  def due_today?
-    Date.today == due_date
-  end
-
-  def due_later?
-    Date.today < due_date
-  end
-
-  def to_displayable_string
-    display_status = completed ? "[X]" : "[ ]"
-    display_date = due_today? ? nil : due_date
-    "#{id} #{display_status} #{todo_text} #{display_date}"
-  end
-
   def self.overdue
-    all.where(" due_date< ?", Date.today)
+    all.where("due_date < ? and (not completed)", Date.today)
   end
 
   def self.due_today
@@ -46,14 +28,10 @@ class Todo < ActiveRecord::Base
     puts "\n\n"
   end
 
-  def self.add_task(new_task)
-    Todo.create!(todo_text: new_task[:todo_text], due_date: Date.today + new_task[:due_in_days], completed: false)
-  end
-
   def self.mark_as_complete!(todo_id)
     todo = Todo.find(todo_id)
     todo.completed = true
     todo.save
-    Todo.find(todo_id)
+    todo
   end
 end
